@@ -1,26 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react"
+import { ApolloProvider } from "@apollo/client"
+import { BrowserRouter, Link } from "react-router-dom"
+import { makeStyles } from "@material-ui/core/styles"
+import Container from "@material-ui/core/Container"
+import Routes from "./Routes"
+import useApolloClient from "./hooks/useApolloClient"
 
-function App() {
+const useStyles = makeStyles({
+  container: {
+    paddingTop: "20px",
+  },
+  navbar: {
+    marginBottom: "20px",
+    "& a": {
+      paddingRight: "15px",
+    },
+  },
+})
+
+const App = () => {
+  const client = useApolloClient()
+  const classes = useStyles()
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <ApolloProvider client={client}>
+      <BrowserRouter>
+        <Container maxWidth="md" className={classes.container}>
+          <div className={classes.navbar}>
+            <Link to="/strain-details">Strain Details</Link>
+            <Link to="/strains-with-phenotype">Strains With Phenotype (1)</Link>
+            <Link to="/strains-with-phenotype-2">
+              Strains With Phenotype (2)
+            </Link>
+          </div>
+          <Routes />
+        </Container>
+      </BrowserRouter>
+    </ApolloProvider>
+  )
 }
 
-export default App;
+export default App
