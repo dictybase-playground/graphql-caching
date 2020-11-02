@@ -34,6 +34,12 @@ const StrainDetails = () => {
           <div key={key}>{`${key}: ${val}`}</div>
         ))}
       </div>
+      <div>
+        <em>
+          This correctly saves/fetches from the cache due to the key being
+          __typename + id (`{data.strain.__typename}:{data.strain.id}`)
+        </em>
+      </div>
     </div>
   )
 }

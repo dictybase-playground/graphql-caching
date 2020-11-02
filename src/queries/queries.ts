@@ -7,7 +7,7 @@ const GET_STRAIN_LIST_WITH_PHENOTYPE = gql`
     $phenotype: String!
   ) {
     listStrainsWithPhenotype(
-      input: { cursor: $cursor, limit: $limit, phenotype: $phenotype }
+      cursor: $cursor, limit: $limit, phenotype: $phenotype
     ) {
       totalCount
       nextCursor

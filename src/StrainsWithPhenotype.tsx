@@ -4,7 +4,6 @@ import { useQuery } from "@apollo/client"
 import { useParams } from "react-router-dom"
 import StrainsWithPhenotypeListDisplay from "./StrainsWithPhenotypeListDisplay"
 import { GET_STRAIN_LIST_WITH_PHENOTYPE } from "./queries/queries"
-import { ListStrainsWithPhenotype } from "./types/types"
 
 const useStyles = makeStyles({
   totalCount: {
@@ -12,42 +11,6 @@ const useStyles = makeStyles({
     top: 0,
   },
 })
-
-/**
- * updateListData is used to return merged data
- */
-const updateListData = (
-  setIsLoadingMore: (arg0: boolean) => void,
-  setHasMore: (arg0: boolean) => void,
-  previousResult: ListStrainsWithPhenotype,
-  fetchMoreResult?: ListStrainsWithPhenotype,
-) => {
-  setIsLoadingMore(false)
-  if (!fetchMoreResult) return previousResult
-
-  const {
-    strains: newStrains,
-    nextCursor: newCursor,
-    totalCount,
-    __typename,
-  } = fetchMoreResult.listStrainsWithPhenotype
-  const previousStrains = previousResult.listStrainsWithPhenotype.strains
-
-  const mergedStrains = [...previousStrains, ...newStrains]
-
-  if (newCursor === 0) {
-    setHasMore(false)
-  }
-
-  return {
-    listStrainsWithPhenotype: {
-      nextCursor: newCursor,
-      totalCount: totalCount,
-      strains: [...new Set(mergedStrains)], // remove any duplicate entries
-      __typename: __typename,
-    },
-  }
-}
 
 // remove "+" from phenotype params to get the proper name
 // i.e. "abolished+protein+phosphorylation" = "abolished protein phosphorylation"

@@ -10,10 +10,10 @@ type ListStrainsWithPhenotype = {
 }
 
 const listStrainsWithPhenotypePagination = () => ({
+  keyArgs: ["phenotype"],
   merge(
     existing: ListStrainsWithPhenotype,
     incoming: ListStrainsWithPhenotype,
-    abc: any,
   ) {
     let strains: ListStrainsWithPhenotype["strains"] = []
     let totalCount: ListStrainsWithPhenotype["totalCount"] = 0
