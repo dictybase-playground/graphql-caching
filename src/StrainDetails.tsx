@@ -1,5 +1,6 @@
 import React from "react"
 import { useQuery } from "@apollo/client"
+import { useParams } from "react-router-dom"
 import { makeStyles } from "@material-ui/core/styles"
 import { GET_STRAIN } from "./queries/queries"
 
@@ -9,11 +10,13 @@ const useStyles = makeStyles({
   },
 })
 
-type Props = {
+type Params = {
+  /** Stock ID from URL */
   id: string
 }
 
-const StrainDetails = ({ id }: Props) => {
+const StrainDetails = () => {
+  const { id } = useParams<Params>()
   const classes = useStyles()
   const { loading, error, data } = useQuery(GET_STRAIN, {
     variables: {

@@ -1,5 +1,40 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client"
 import { setContext } from "@apollo/client/link/context"
+import { StrainWithPhenotype } from "../types/types"
+
+type ListStrainsWithPhenotype = {
+  strains: Array<StrainWithPhenotype>
+  nextCursor: number
+  totalCount: number
+  __typename: string
+}
+
+const listStrainsWithPhenotypePagination = () => ({
+  merge(
+    existing: ListStrainsWithPhenotype,
+    incoming: ListStrainsWithPhenotype,
+    abc: any,
+  ) {
+    let strains: ListStrainsWithPhenotype["strains"] = []
+    let totalCount: ListStrainsWithPhenotype["totalCount"] = 0
+    if (existing && existing.strains) {
+      strains = strains.concat(existing.strains)
+      totalCount = existing.totalCount
+    }
+    if (incoming && incoming.strains) {
+      strains = strains.concat(incoming.strains)
+      totalCount = totalCount + incoming.totalCount
+    }
+    return {
+      ...incoming,
+      strains,
+      totalCount,
+    }
+  },
+  read(existing: ListStrainsWithPhenotype) {
+    return existing
+  },
+})
 
 const useApolloClient = () => {
   const authLink = setContext((request, { headers }) => {
@@ -18,7 +53,15 @@ const useApolloClient = () => {
     }),
   )
 
-  const cache = new InMemoryCache()
+  const cache = new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          listStrainsWithPhenotype: listStrainsWithPhenotypePagination(),
+        },
+      },
+    },
+  })
 
   return new ApolloClient({
     cache,

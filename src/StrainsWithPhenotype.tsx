@@ -1,8 +1,17 @@
 import React from "react"
+import { makeStyles } from "@material-ui/core/styles"
 import { useQuery } from "@apollo/client"
+import { useParams } from "react-router-dom"
 import StrainsWithPhenotypeListDisplay from "./StrainsWithPhenotypeListDisplay"
 import { GET_STRAIN_LIST_WITH_PHENOTYPE } from "./queries/queries"
 import { ListStrainsWithPhenotype } from "./types/types"
+
+const useStyles = makeStyles({
+  totalCount: {
+    position: "sticky",
+    top: 0,
+  },
+})
 
 /**
  * updateListData is used to return merged data
@@ -40,6 +49,15 @@ const updateListData = (
   }
 }
 
+// remove "+" from phenotype params to get the proper name
+// i.e. "abolished+protein+phosphorylation" = "abolished protein phosphorylation"
+const cleanQuery = (phenotype: string) => phenotype.split("+").join(" ")
+
+type Params = {
+  /** Phenotype name from URL */
+  name: string
+}
+
 /**
  * Custom hook to handle all fetching/refetching logic
  * */
@@ -52,6 +70,7 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
     {
       variables: { cursor: 0, limit: 50, phenotype },
       errorPolicy: "all",
+      // fetchPolicy: "cache-and-network",
     },
   )
 
@@ -62,23 +81,19 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
     }
     setPrevCursor(newCursor)
     setIsLoadingMore(true)
-    await fetchMore({
+    const res = await fetchMore({
       variables: {
-        cursor: newCursor,
+        cursor: data.listStrainsWithPhenotype.nextCursor,
         limit: 50,
         phenotype,
       },
-      updateQuery: (
-        previousResult: ListStrainsWithPhenotype,
-        { fetchMoreResult }: { fetchMoreResult?: ListStrainsWithPhenotype },
-      ) =>
-        updateListData(
-          setIsLoadingMore,
-          setHasMore,
-          previousResult,
-          fetchMoreResult,
-        ),
     })
+    if (res.data) {
+      setIsLoadingMore(false)
+    }
+    if (newCursor === 0) {
+      setHasMore(false)
+    }
   }
 
   return {
@@ -91,11 +106,10 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
   }
 }
 
-type Props = {
-  phenotype: string
-}
-
-const StrainsWithPhenotype = ({ phenotype }: Props) => {
+const StrainsWithPhenotype = () => {
+  const classes = useStyles()
+  const { name } = useParams<Params>()
+  const phenotype = cleanQuery(name)
   const {
     loading,
     error,
@@ -112,7 +126,9 @@ const StrainsWithPhenotype = ({ phenotype }: Props) => {
 
   return (
     <div>
-      got {totalCount} items for {phenotype} on this request
+      <div className={classes.totalCount}>
+        got {totalCount} items for {phenotype}
+      </div>
       <StrainsWithPhenotypeListDisplay
         loadMore={loadMoreItems}
         hasMore={hasMore}

@@ -28,13 +28,20 @@ const App = () => {
         <Container maxWidth="md" className={classes.container}>
           <div>
             <strong>Strain Details: </strong>
-            <Link to="/strain-details">DBS0351367</Link>
-            <Link to="/strain-details-2">DBS0349879</Link>
+            <Link to="/strains/DBS0351367">DBS0351367</Link>
+            <Link to="/strains/DBS0349879">DBS0349879</Link>
           </div>
           <div className={classes.navbar}>
             <strong>Strains With Phenotype: </strong>
-            <Link to="/strains-with-phenotype">aberrant aggregation</Link>
-            <Link to="/strains-with-phenotype-2">decreased growth rate</Link>
+            <Link to="/phenotypes/aberrant+aggregation">
+              aberrant aggregation
+            </Link>
+            <Link to="/phenotypes/decreased+growth+rate">
+              decreased growth rate
+            </Link>
+            <Link to="/phenotypes/abolished+protein+phosphorylation">
+              abolished protein phosphorylation
+            </Link>
           </div>
           <Routes />
         </Container>
