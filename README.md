@@ -61,7 +61,7 @@ const cache = new InMemoryCache({
               totalCount,
             }
           },
-          read(existing: ListStrainsWithAnnotation) {
+          read(existing) {
             return existing
           },
         },
