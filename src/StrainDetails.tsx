@@ -2,7 +2,7 @@ import React from "react"
 import { useQuery } from "@apollo/client"
 import { useParams } from "react-router-dom"
 import { makeStyles } from "@material-ui/core/styles"
-import { GET_STRAIN } from "./queries/queries"
+import { GET_STRAIN } from "./graphql/queries"
 
 const useStyles = makeStyles({
   strain: {

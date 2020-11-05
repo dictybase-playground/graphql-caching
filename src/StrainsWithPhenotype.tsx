@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles"
 import { useQuery } from "@apollo/client"
 import { useParams } from "react-router-dom"
 import StrainsWithPhenotypeListDisplay from "./StrainsWithPhenotypeListDisplay"
-import { GET_STRAIN_LIST_WITH_PHENOTYPE } from "./queries/queries"
+import { GET_STRAIN_LIST_WITH_PHENOTYPE } from "./graphql/queries"
 
 const useStyles = makeStyles({
   totalCount: {
