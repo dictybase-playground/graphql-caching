@@ -2,26 +2,26 @@ import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client"
 import { setContext } from "@apollo/client/link/context"
 import { StrainWithPhenotype } from "../types/types"
 
-type ListStrainsWithPhenotype = {
+type ListStrainsWithAnnotation = {
   strains: Array<StrainWithPhenotype>
   nextCursor: number
   totalCount: number
   __typename: string
 }
 
-const listStrainsWithPhenotypePagination = () => ({
-  keyArgs: ["phenotype"],
+const listStrainsWithAnnotationPagination = () => ({
+  keyArgs: ["type", "annotation"],
   merge(
-    existing: ListStrainsWithPhenotype,
-    incoming: ListStrainsWithPhenotype,
+    existing: ListStrainsWithAnnotation,
+    incoming: ListStrainsWithAnnotation,
   ) {
-    let strains: ListStrainsWithPhenotype["strains"] = []
-    let totalCount: ListStrainsWithPhenotype["totalCount"] = 0
-    if (existing && existing.strains) {
+    let strains: ListStrainsWithAnnotation["strains"] = []
+    let totalCount: ListStrainsWithAnnotation["totalCount"] = 0
+    if (existing) {
       strains = strains.concat(existing.strains)
       totalCount = existing.totalCount
     }
-    if (incoming && incoming.strains) {
+    if (incoming) {
       strains = strains.concat(incoming.strains)
       totalCount = totalCount + incoming.totalCount
     }
@@ -31,7 +31,7 @@ const listStrainsWithPhenotypePagination = () => ({
       totalCount,
     }
   },
-  read(existing: ListStrainsWithPhenotype) {
+  read(existing: ListStrainsWithAnnotation) {
     return existing
   },
 })
@@ -57,7 +57,7 @@ const useApolloClient = () => {
     typePolicies: {
       Query: {
         fields: {
-          listStrainsWithPhenotype: listStrainsWithPhenotypePagination(),
+          listStrainsWithAnnotation: listStrainsWithAnnotationPagination(),
         },
       },
     },

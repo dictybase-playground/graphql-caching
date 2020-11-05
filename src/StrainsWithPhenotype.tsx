@@ -31,7 +31,12 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
   const { loading, error, data, fetchMore } = useQuery(
     GET_STRAIN_LIST_WITH_PHENOTYPE,
     {
-      variables: { cursor: 0, limit: 50, phenotype },
+      variables: {
+        cursor: 0,
+        limit: 50,
+        type: "phenotype",
+        annotation: phenotype,
+      },
       errorPolicy: "all",
       // fetchPolicy: "cache-and-network",
     },
@@ -41,7 +46,7 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
     const newCursor = data.listStrainsWithPhenotype.nextCursor
     // need to check for same cursor to prevent extra fetching
     // https://github.com/apollographql/apollo-client/issues/5901
-    if (newCursor === prevCursor) {
+    if (newCursor === prevCursor || newCursor === 0) {
       return
     }
     setPrevCursor(newCursor)
@@ -50,7 +55,8 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
       variables: {
         cursor: data.listStrainsWithPhenotype.nextCursor,
         limit: 50,
-        phenotype,
+        type: "phenotype",
+        annotation: phenotype,
       },
     })
     if (res.data) {
