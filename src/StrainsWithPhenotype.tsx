@@ -43,7 +43,7 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
   )
 
   const loadMoreItems = async () => {
-    const newCursor = data.listStrainsWithPhenotype.nextCursor
+    const newCursor = data.listStrainsWithAnnotation.nextCursor
     // need to check for same cursor to prevent extra fetching
     // https://github.com/apollographql/apollo-client/issues/5901
     if (newCursor === prevCursor || newCursor === 0) {
@@ -53,7 +53,7 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
     setIsLoadingMore(true)
     const res: any = await fetchMore({
       variables: {
-        cursor: data.listStrainsWithPhenotype.nextCursor,
+        cursor: data.listStrainsWithAnnotation.nextCursor,
         limit: 50,
         type: "phenotype",
         annotation: phenotype,
@@ -62,7 +62,7 @@ const useListStrainsWithPhenotype = (phenotype: string) => {
     if (res.data) {
       setIsLoadingMore(false)
     }
-    if (res.data.listStrainsWithPhenotype.nextCursor === 0) {
+    if (res.data.listStrainsWithAnnotation.nextCursor === 0) {
       setHasMore(false)
     }
   }
@@ -93,7 +93,7 @@ const StrainsWithPhenotype = () => {
   if (loading) return <p>Loading...</p>
   if (error && !data) return <p>Error :(</p>
 
-  const { totalCount, strains } = data.listStrainsWithPhenotype
+  const { totalCount, strains } = data.listStrainsWithAnnotation
 
   return (
     <div>
