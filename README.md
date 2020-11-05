@@ -1,46 +1,81 @@
-# Getting Started with Create React App
+# graphql-caching
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a demo app to show caching techniques with GraphQL, specifically with infinite list queries.
 
-## Available Scripts
+For infinite scroll pages, the previous way to handle the caching of continuous list queries was to
+use the `updateQuery` method attached to the `fetchMore` query. An example:
 
-In the project directory, you can run:
+```jsx
+fetchMore({
+  query: GET_STRAIN_LIST_WITH_PHENOTYPE,
+  variables: {
+    cursor: data.listStrainsWithAnnotation.nextCursor,
+    limit: 50,
+    type: "phenotype",
+    annotation: "abolished protein phosphorylation",
+  },
+  updateQuery: (previousResult, { fetchMoreResult }) => {
+    if (!fetchMoreResult) return previousResult
+    const previousStrains = previousResult.listStrainsWithAnnotation.strains
+    const newStrains = fetchMoreResult.listStrainsWithAnnotation.strains
+    const newCursor = fetchMoreResult.listStrainsWithAnnotation.nextCursor
+    const allStrains = [...previousStrains, ...newStrains]
 
-### `yarn start`
+    return {
+      listStrainsWithAnnotation: {
+        nextCursor: newCursor,
+        totalCount: fetchMoreResult.listStrainsWithAnnotation.totalCount,
+        strains: allStrains,
+        __typename: previousResult.listStrainsWithAnnotation.__typename,
+      },
+    }
+  },
+})
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+With Apollo Client V3, the `updateQuery` method became deprecated. The new way to handle
+[pagination caching](https://www.apollographql.com/docs/react/pagination/core-api/) is to add new
+`typePolicies` to the `InMemoryCache`. Example:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```jsx
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        listStrainsWithAnnotation: {
+          keyArgs: ["type", "annotation"],
+          merge(existing, incoming) {
+            let strains = []
+            let totalCount = 0
+            if (existing) {
+              strains = strains.concat(existing.strains)
+              totalCount = existing.totalCount
+            }
+            if (incoming) {
+              strains = strains.concat(incoming.strains)
+              totalCount = totalCount + incoming.totalCount
+            }
+            return {
+              ...incoming,
+              strains,
+              totalCount,
+            }
+          },
+          read(existing: ListStrainsWithAnnotation) {
+            return existing
+          },
+        },
+      },
+    },
+  },
+})
+```
 
-### `yarn test`
+In the above example we are using the key arguments of `type` and `annotation` to create
+a unique cache identifier for each different list query. If there is incoming data, the
+incoming strains are merged with the existing strains into the same cache object. The total
+count is also increased to give a combined number as new items are retrieved.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+In this web app, there are demos of strain details queries and demos of listing strains with a given phenotype.
+For the details queries, we do not need to define a custom type policy because the cache key is
+automatically generated by the format of `__typename:id` (i.e. `Strain:DBS0351367`).
